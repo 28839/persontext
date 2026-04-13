@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBTI星座人格实验室 | 你的宇宙嘴替</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a12;
+            --bg-card: #13132a;
+            --bg-card-hover: #1a1a3a;
+            --accent-primary: #e94560;
+            --accent-secondary: #533483;
+            --accent-gold: #f5c518;
+            --text-primary: #eeeef0;
+            --text-muted: #8888a0;
+            --text-dim: #555570;
+            --success: #4cc9f0;
+            --border: rgba(233,69,96,0.15);
+            --glow: rgba(233,69,96,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(83,52,131,0.12) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(233,69,96,0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 50%, rgba(76,201,240,0.04) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, -1%) rotate(1deg); }
+            66% { transform: translate(-1%, 2%) rotate(-1deg); }
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2rem 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 启动页 ===== */
+        #intro {
+            text-align: center;
+            padding-top: 8vh;
+            animation: fadeInUp 1s ease;
+        }
+        .logo-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        #intro h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: clamp(2.2rem, 7vw, 3.2rem);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-gold), var(--accent-primary));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        #intro .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            line-height: 1.8;
+        }
+        .tag-line {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0 2.5rem;
+        }
+        .tag {
+            background: rgba(233,69,96,0.1);
+            border: 1px solid rgba(233,69,96,0.2);
+            color: var(--accent-primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-primary), #c0392b);
+            color: white;
+            border: none;
+            padding: 1.1rem 3.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 30px rgba(233,69,96,0.35);
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+        .start-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+        .start-btn:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+        .start-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 12px 40px rgba(233,69,96,0.5);
+        }
+        .intro-footer {
+            margin-top: 3rem;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            line-height: 1.8;
+        }
+
+        /* ===== 星座选择模态框 ===== */
+        #zodiac-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2.5rem 2rem;
+            border-radius: 24px;
+            max-width: 480px;
+            width: 92%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-content h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal-content p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .zodiac-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .zodiac-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1.5px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 0.7rem 0.3rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.82rem;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .zodiac-btn:hover {
+            background: rgba(233,69,96,0.12);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+        .zodiac-btn .emoji {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 0.2rem;
+        }
+
+        /* ===== 问卷页 ===== */
+        #quiz { display: none; }
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .quiz-header .counter {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .quiz-header .zodiac-badge {
+            background: rgba(233,69,96,0.1);
+            border: 1px solid rgba(233,69,96,0.2);
+            color: var(--accent-primary);
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold));
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+        }
+        .question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease;
+        }
+        .question-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .question-number {
+            color: var(--accent-primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .question-tag {
+            background: rgba(76,201,240,0.1);
+            color: var(--success);
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 500;
+        }
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            margin-bottom: 1.8rem;
+            font-weight: 400;
+        }
+        .options { display: grid; gap: 0.7rem; }
+        .option {
+            background: rgba(255,255,255,0.02);
+            border: 1.5px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 1rem 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
+        }
+        .option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--accent-primary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        .option:hover {
+            background: rgba(233,69,96,0.06);
+            border-color: rgba(233,69,96,0.3);
+            transform: translateX(4px);
+        }
+        .option:hover::before {
+            transform: scaleY(1);
+        }
+        .option.selected {
+            background: rgba(233,69,96,0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(233,69,96,0.1);
+        }
+        .option.selected::before {
+            transform: scaleY(1);
+        }
+        .option-letter {
+            display: inline-block;
+            width: 1.4rem;
+            height: 1.4rem;
+            line-height: 1.4rem;
+            text-align: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 0.6rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+        .option.selected .option-letter {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* ===== 结果页 ===== */
+        #result {
+            display: none;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+            padding-top: 5vh;
+        }
+        .result-stars {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .result-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+        }
+        .result-label {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(135deg, rgba(233,69,96,0.15), rgba(83,52,131,0.15));
+            border: 1px solid rgba(233,69,96,0.2);
+            border-radius: 16px;
+            display: inline-block;
+            background-clip: padding-box;
+        }
+        .result-subtitle {
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .result-desc {
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--text-muted);
+            max-width: 580px;
+            margin: 0 auto 2rem;
+            text-align: left;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+        .result-tags {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+        .result-tag {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .result-advice {
+            max-width: 580px;
+            margin: 0 auto 2.5rem;
+            padding: 1.5rem;
+            background: rgba(76,201,240,0.05);
+            border: 1px solid rgba(76,201,240,0.15);
+            border-radius: 16px;
+            text-align: left;
+        }
+        .result-advice h3 {
+            color: var(--success);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+        .result-advice p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .restart-btn {
+            background: transparent;
+            color: var(--accent-primary);
+            border: 2px solid var(--accent-primary);
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: 500;
+        }
+        .restart-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .share-btn {
+            background: linear-gradient(135deg, var(--accent-secondary), #7b2ff7);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: 500;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(123,47,247,0.4);
+        }
+        .result-footer {
+            color: var(--text-dim);
+            font-size: 0.72rem;
+            line-height: 1.8;
+            margin-top: 1rem;
+        }
+        .qr-hint {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .qr-hint .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            margin: 1rem auto;
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        /* ===== 动画 ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 分享弹窗 ===== */
+        #share-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .share-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: scaleIn 0.4s ease;
+        }
+        .share-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        .share-text {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6-all;
+        }
+        .copy-btn {
+            background:;
+            text-align: left;
+            word-break: break var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: all 0.3s ease;
+            margin: 0.3rem;
+        }
+        .copy-btn:hover { transform: translateY(-2px); }
+        .close-modal-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: all 0.3s ease;
+            margin: 0.3rem;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            .container { padding: 1.5rem 1rem; }
+            .question-card { padding: 1.5rem 1.2rem; }
+            .modal-content { padding: 2rem 1.5rem; }
+            .zodiac-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ===== 启动页 ===== -->
+        <div id="intro">
+            <span class="logo-icon">🔮</span>
+            <h1>SBTI 星座人格实验室</h1>
+            <p class="subtitle">MBTI过时了，SBTI也该升级了<br>50道题，解码你的 <strong style="color:var(--accent-primary)">星座 × 情绪</strong> 双重人格</p>
+            <div class="tag-line">
+                <span class="tag">🪐 12星座融合</span>
+                <span class="tag">🧠 50道灵魂拷问</span>
+                <span class="tag">🎭 16种复合人格</span>
+                <span class="tag">🔥 社交嘴替认证</span>
+            </div>
+            <button class="start-btn" onclick="showZodiacModal()">开始测试</button>
+            <div class="intro-footer">
+                本测试融合SBTI自嘲精神与星座文化<br>
+                仅供娱乐，非专业心理测评 · 约需5-8分钟
+            </div>
+        </div>
+
+        <!-- ===== 星座选择 ===== -->
+        <div id="zodiac-modal">
+            <div class="modal-content">
+                <h2>🪐 选择你的太阳星座</h2>
+                <p>这是生成你专属复合人格的关键一步</p>
+                <div class="zodiac-grid">
+                    <button class="zodiac-btn" onclick="selectZodiac('白羊座')"><span class="emoji">♈</span>白羊座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('金牛座')"><span class="emoji">♉</span>金牛座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('双子座')"><span class="emoji">♊</span>双子座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('巨蟹座')"><span class="emoji">♋</span>巨蟹座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('狮子座')"><span class="emoji">♌</span>狮子座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('处女座')"><span class="emoji">♍</span>处女座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('天秤座')"><span class="emoji">♎</span>天秤座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('天蝎座')"><span class="emoji">♏</span>天蝎座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('射手座')"><span class="emoji">♐</span>射手座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('摩羯座')"><span class="emoji">♑</span>摩羯座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('水瓶座')"><span class="emoji">♒</span>水瓶座</button>
+                    <button class="zodiac-btn" onclick="selectZodiac('双鱼座')"><span class="emoji">♓</span>双鱼座</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 问卷页 ===== -->
+        <div id="quiz">
+            <div class="quiz-header">
+                <span class="counter" id="counter">1 / 50</span>
+                <span class="zodiac-badge" id="zodiac-badge"></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="question-card">
+                <div class="question-meta">
+                    <span class="question-number" id="q-number"></span>
+                    <span class="question-tag" id="q-tag"></span>
+                </div>
+                <div class="question-text" id="q-text"></div>
+                <div class="options" id="options-box"></div>
+            </div>
+        </div>
+
+        <!-- ===== 结果页 ===== -->
+        <div id="result">
+            <div class="result-stars">✨🔮✨</div>
+            <div class="result-title">你的复合人格是</div>
+            <div class="result-label" id="r-label"></div>
+            <div class="result-subtitle" id="r-subtitle"></div>
+            <div class="result-desc" id="r-desc"></div>
+            <div class="result-tags" id="r-tags"></div>
+            <div class="result-advice" id="r-advice">
+                <h3>💡 你的生存指南</h3>
+                <p id="r-advice-text"></p>
+            </div>
+            <div class="action-buttons">
+                <button class="restart-btn" onclick="location.reload()">🔄 再测一次</button>
+                <button class="share-btn" onclick="showShare()">📤 分享给朋友</button>
+            </div>
+            <div class="result-footer">
+                *本测试融合SBTI自嘲精神与星座文化，仅供娱乐，非专业心理测评<br>
+                扫描下方二维码，分享给朋友一起玩 ↓
+            </div>
+        </div>
+
+        <!-- ===== 分享弹窗 ===== -->
+        <div id="share-modal">
+            <div class="share-card">
+                <h3>📤 复制分享文案</h3>
+                <div class="share-text" id="share-text"></div>
+                <button class="copy-btn" onclick="copyShare()">📋 复制文案</button>
+                <button class="close-modal-btn" onclick="closeShare()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// =====================================================================
+//  完整50题题库
+// =====================================================================
+const questions = [
+// ──────────── 第一部分：SBTI核心题 (Q1-Q30) ────────────
+{
+    type:'sbt', tag:'情绪反应',
+    text:'周一早晨，闹钟响后你的状态更接近？',
+    options:[
+        {text:'垂死病中惊坐起，今天也要加油鸭！', s:{lie:0,burn:0,sober:2,social:1}},
+        {text:'关掉闹钟，再睡"五分钟"（通常半小时）', s:{lie:3,burn:1,sober:0,social:0}},
+        {text:'睁眼思考：我为什么要上班？宇宙的尽头是编制吗？', s:{lie:1,burn:3,sober:1,social:0}},
+        {text:'直接请假，与床融为一体', s:{lie:4,burn:2,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'社交态度',
+    text:'朋友临时约你周末出去玩，你第一反应是？',
+    options:[
+        {text:'太好了！终于有人约我了！', s:{lie:0,burn:0,sober:0,social:4}},
+        {text:'看心情，再说吧', s:{lie:3,burn:1,sober:0,social:0}},
+        {text:'内心OS：我已经有安排了吗？好像没有……但就是不想动', s:{lie:2,burn:3,sober:0,social:0}},
+        {text:'去可以，但别太晚，我需要时间恢复社交能量', s:{lie:0,burn:1,sober:3,social:1}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪内耗',
+    text:'深夜躺在床上，你最常做的事是？',
+    options:[
+        {text:'刷短视频，一个接一个停不下来', s:{lie:3,burn:1,sober:0,social:0}},
+        {text:'回想今天说过的话，反复咀嚼有没有说错', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'规划明天的任务，列个清单', s:{lie:0,burn:0,sober:4,social:0}},
+        {text:'和朋友聊天或刷社交媒体', s:{lie:1,burn:0,sober:0,social:3}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪反应',
+    text:'被别人当众指出错误时，你内心的第一反应是？',
+    options:[
+        {text:'脸红心跳，想找个地缝钻进去', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'表面微笑，内心已经在组织反击语言', s:{lie:0,burn:2,sober:2,social:1}},
+        {text:'无所谓，有则改之无则加勉', s:{lie:0,burn:0,sober:4,social:0}},
+        {text:'当场解释/反驳，不让自己吃亏', s:{lie:0,burn:0,sober:1,social:3}}
+    ]
+},
+{
+    type:'sbt', tag:'社交能量',
+    text:'参加一场大型聚会，你的状态更像是？',
+    options:[
+        {text:'全场最嗨的人，气氛组担当', s:{lie:0,burn:0,sober:0,social:4}},
+        {text:'找一个角落安静待着，偶尔和一两个人聊', s:{lie:2,burn:1,sober:1,social:1}},
+        {text:'一开始很嗨，两小时后电量耗尽想逃跑', s:{lie:1,burn:2,sober:0,social:2}},
+        {text:'根本不参加这种活动', s:{lie:3,burn:1,sober:1,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪内耗',
+    text:'看到别人过得比你好（升职/恋爱/旅行），你的真实感受是？',
+    options:[
+        {text:'真心为他们高兴！', s:{lie:0,burn:0,sober:1,social:3}},
+        {text:'表面点赞，内心酸酸的', s:{lie:1,burn:3,sober:0,social:1}},
+        {text:'跟我有什么关系？划走', s:{lie:2,burn:0,sober:3,social:0}},
+        {text:'开始对比自己为什么没做到，陷入emo', s:{lie:0,burn:4,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'决策模式',
+    text:'做重要决定时，你通常会？',
+    options:[
+        {text:'凭直觉，感觉对了就冲', s:{lie:1,burn:0,sober:0,social:2}},
+        {text:'反复分析利弊，列个对比表', s:{lie:0,burn:2,sober:4,social:0}},
+        {text:'问遍身边所有人的意见', s:{lie:0,burn:1,sober:0,social:4}},
+        {text:'拖到最后不得不决定时随便选一个', s:{lie:4,burn:2,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪反应',
+    text:'收到一条让你不舒服的消息，你会？',
+    options:[
+        {text:'立刻回复，表达不满', s:{lie:0,burn:0,sober:1,social:3}},
+        {text:'截图发给朋友，一起吐槽分析', s:{lie:0,burn:2,sober:0,social:3}},
+        {text:'已读不回，冷处理', s:{lie:3,burn:1,sober:1,social:0}},
+        {text:'反复看这条消息，越想越气', s:{lie:0,burn:4,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'内耗程度',
+    text:'你认为自己"内耗"的程度是？',
+    options:[
+        {text:'重度内耗，每天都在精神拉扯', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'偶尔内耗，大部分时间还好', s:{lie:1,burn:2,sober:1,social:1}},
+        {text:'基本不内耗，想太多太累了', s:{lie:3,burn:0,sober:2,social:0}},
+        {text:'什么是内耗？我只关心今天吃什么', s:{lie:4,burn:0,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪反应',
+    text:'工作中被分配到一个不喜欢的任务，你会？',
+    options:[
+        {text:'忍着做完，但全程痛苦面具', s:{lie:0,burn:3,sober:1,social:0}},
+        {text:'找机会推给别人', s:{lie:4,burn:0,sober:0,social:1}},
+        {text:'虽然不喜欢，但会找到高效完成的方法', s:{lie:0,burn:0,sober:4,social:0}},
+        {text:'直接说不想做（或委婉表达）', s:{lie:1,burn:0,sober:1,social:3}}
+    ]
+},
+{
+    type:'sbt', tag:'社交焦虑',
+    text:'在社交媒体上发一条动态后，你会？',
+    options:[
+        {text:'不停刷新看有没有人点赞评论', s:{lie:0,burn:3,sober:0,social:2}},
+        {text:'发完就关了，不太在意', s:{lie:2,burn:0,sober:3,social:0}},
+        {text:'纠结了很久才发出去，发完又想删', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'根本不发，默默看别人', s:{lie:3,burn:1,sober:1,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'社交焦虑',
+    text:'被拉进一个新群聊，你会？',
+    options:[
+        {text:'主动打招呼，快速融入', s:{lie:0,burn:0,sober:0,social:4}},
+        {text:'默默潜水，从不发言', s:{lie:3,burn:1,sober:1,social:0}},
+        {text:'观察一下群里的氛围再决定要不要说话', s:{lie:0,burn:1,sober:3,social:1}},
+        {text:'设置了免打扰，假装不存在', s:{lie:4,burn:1,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'应对模式',
+    text:'面对一项困难任务，你的第一反应是？',
+    options:[
+        {text:'死磕到底，不完成不罢休', s:{lie:0,burn:1,sober:2,social:1}},
+        {text:'先睡一觉/吃顿好的再说', s:{lie:3,burn:1,sober:0,social:0}},
+        {text:'找人帮忙或分工', s:{lie:0,burn:0,sober:1,social:4}},
+        {text:'假装没看见，等deadline再说', s:{lie:4,burn:2,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'社交能量',
+    text:'你更喜欢的社交方式是？',
+    options:[
+        {text:'大型聚会，人越多越嗨', s:{lie:0,burn:0,sober:0,social:4}},
+        {text:'三五好友的小聚', s:{lie:0,burn:0,sober:1,social:3}},
+        {text:'一对一深度聊天', s:{lie:0,burn:1,sober:3,social:1}},
+        {text:'线上聊天就好，见面太累了', s:{lie:3,burn:2,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'自我表达',
+    text:'你发朋友圈的频率是？',
+    options:[
+        {text:'几乎每天，记录生活', s:{lie:0,burn:0,sober:0,social:4}},
+        {text:'偶尔发，有值得分享的事才发', s:{lie:0,burn:0,sober:2,social:2}},
+        {text:'很少发，觉得没必要展示', s:{lie:2,burn:1,sober:2,social:0}},
+        {text:'从不发，但天天刷', s:{lie:3,burn:2,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'决策模式',
+    text:'当别人给你建议时，你通常会？',
+    options:[
+        {text:'认真听取，觉得有道理就采纳', s:{lie:0,burn:0,sober:3,social:2}},
+        {text:'表面点头，内心"你说得对但我不想听"', s:{lie:2,burn:2,sober:0,social:1}},
+        {text:'马上反驳，证明自己想法更好', s:{lie:0,burn:1,sober:1,social:3}},
+        {text:'无所谓，给什么建议都行', s:{lie:3,burn:0,sober:1,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'社交态度',
+    text:'在团队中表达不同意见，你会？',
+    options:[
+        {text:'很自在，有不同想法就应该说出来', s:{lie:0,burn:0,sober:1,social:4}},
+        {text:'有点紧张，但还是会说', s:{lie:0,burn:2,sober:1,social:2}},
+        {text:'不太敢，怕引起冲突', s:{lie:1,burn:3,sober:0,social:1}},
+        {text:'根本不参与讨论，随大流', s:{lie:4,burn:1,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'应对模式',
+    text:'你更倾向于如何处理人际矛盾？',
+    options:[
+        {text:'直接面对，把话说开', s:{lie:0,burn:0,sober:1,social:4}},
+        {text:'冷战，等对方先低头', s:{lie:3,burn:2,sober:0,social:0}},
+        {text:'找第三方调解', s:{lie:0,burn:1,sober:2,social:2}},
+        {text:'算了，不想计较，但心里记着', s:{lie:1,burn:4,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'应对模式',
+    text:'面对不喜欢但必须完成的任务，你会？',
+    options:[
+        {text:'咬牙做完，做完就解脱了', s:{lie:0,burn:2,sober:2,social:0}},
+        {text:'能拖就拖，拖到不能再拖', s:{lie:4,burn:2,sober:0,social:0}},
+        {text:'想办法让过程变得有趣一点', s:{lie:1,burn:0,sober:2,social:2}},
+        {text:'直接放弃/摆烂', s:{lie:4,burn:1,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'人生规划',
+    text:'你对自己人生方向的看法是？',
+    options:[
+        {text:'非常清晰，知道自己要什么', s:{lie:0,burn:0,sober:4,social:0}},
+        {text:'有大致方向，但细节不确定', s:{lie:1,burn:1,sober:3,social:0}},
+        {text:'走一步看一步，计划赶不上变化', s:{lie:3,burn:1,sober:0,social:1}},
+        {text:'完全迷茫，不知道自己想要什么', s:{lie:1,burn:4,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'生活习惯',
+    text:'你每天睡前最后看手机的时间是？',
+    options:[
+        {text:'放下手机就睡，作息规律', s:{lie:0,burn:0,sober:4,social:0}},
+        {text:'刷到困了自然睡', s:{lie:2,burn:1,sober:0,social:1}},
+        {text:'明明很困但就是放不下手机', s:{lie:3,burn:2,sober:0,social:0}},
+        {text:'失眠到凌晨，手机是唯一陪伴', s:{lie:2,burn:4,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'消费行为',
+    text:'你网购时的状态是？',
+    options:[
+        {text:'冲动下单，买完才看评价', s:{lie:2,burn:0,sober:0,social:2}},
+        {text:'反复比价，研究三天再买', s:{lie:0,burn:2,sober:4,social:0}},
+        {text:'加购物车，但大部分不会买', s:{lie:3,burn:1,sober:0,social:0}},
+        {text:'需要什么直接买，不太纠结', s:{lie:0,burn:0,sober:2,social:2}}
+    ]
+},
+{
+    type:'sbt', tag:'自我认知',
+    text:'朋友对你的评价最可能是？',
+    options:[
+        {text:'"你太正能量了，像个小太阳"', s:{lie:0,burn:0,sober:0,social:4}},
+        {text:'"你想太多了，放松点"', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'"你很靠谱，跟你在一起很安心"', s:{lie:0,burn:0,sober:4,social:1}},
+        {text:'"你太佛系了，什么都无所谓"', s:{lie:4,burn:0,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'自我认知',
+    text:'你觉得自己最大的优点是？',
+    options:[
+        {text:'情绪稳定，心态好', s:{lie:0,burn:0,sober:3,social:1}},
+        {text:'善于共情，理解他人', s:{lie:0,burn:3,sober:0,social:2}},
+        {text:'执行力强，说到做到', s:{lie:0,burn:0,sober:4,social:1}},
+        {text:'创意丰富，脑洞大', s:{lie:2,burn:0,sober:1,social:2}}
+    ]
+},
+{
+    type:'sbt', tag:'自我认知',
+    text:'你对"精神内耗"这个词的理解是？',
+    options:[
+        {text:'太懂了，我就是活生生的例子', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'大概了解，偶尔会这样', s:{lie:1,burn:2,sober:1,social:1}},
+        {text:'不太理解，想那么多干嘛', s:{lie:3,burn:0,sober:2,social:0}},
+        {text:'这是什么新流行词？', s:{lie:4,burn:0,sober:0,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'知识焦虑',
+    text:'看到别人在学习新技能，你会？',
+    options:[
+        {text:'我也要学！立刻搜索相关课程', s:{lie:0,burn:1,sober:1,social:3}},
+        {text:'收藏=学过，买课=上过', s:{lie:3,burn:1,sober:0,social:0}},
+        {text:'默默焦虑，但身体很诚实继续刷手机', s:{lie:2,burn:4,sober:0,social:0}},
+        {text:'不感兴趣，各有所长嘛', s:{lie:2,burn:0,sober:3,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'沟通习惯',
+    text:'你发消息前会反复检查措辞吗？',
+    options:[
+        {text:'每条消息都斟酌很久，删了又写', s:{lie:0,burn:4,sober:0,social:1}},
+        {text:'重要的消息会检查，日常随意', s:{lie:0,burn:1,sober:3,social:1}},
+        {text:'想到什么发什么，从不纠结', s:{lie:1,burn:0,sober:0,social:3}},
+        {text:'发语音，打字太累了', s:{lie:3,burn:0,sober:0,social:1}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪反应',
+    text:'工作时被打断，你的反应是？',
+    options:[
+        {text:'非常烦躁，需要时间重新进入状态', s:{lie:0,burn:3,sober:1,social:0}},
+        {text:'还好，能快速切换', s:{lie:0,burn:0,sober:3,social:1}},
+        {text:'正合我意，终于有借口休息了', s:{lie:4,burn:0,sober:0,social:0}},
+        {text:'表面微笑，内心翻白眼', s:{lie:1,burn:3,sober:0,social:1}}
+    ]
+},
+{
+    type:'sbt', tag:'社交态度',
+    text:'当别人向你求助时，你会？',
+    options:[
+        {text:'立刻答应，不会拒绝', s:{lie:0,burn:2,sober:0,social:3}},
+        {text:'看情况，能帮就帮', s:{lie:0,burn:0,sober:3,social:2}},
+        {text:'内心不想帮但不好意思拒绝', s:{lie:1,burn:4,sober:0,social:0}},
+        {text:'直接说帮不了（或已读不回）', s:{lie:3,burn:0,sober:1,social:0}}
+    ]
+},
+{
+    type:'sbt', tag:'情绪反应',
+    text:'周末计划被打乱，你会？',
+    options:[
+        {text:'有点生气，但很快调整过来', s:{lie:0,burn:1,sober:2,social:1}},
+        {text:'非常烦躁，一整天都不开心', s:{lie:0,burn:4,sober:0,social:0}},
+        {text:'无所谓，计划本来就是用来打破的', s:{lie:3,burn:0,sober:1,social:0}},
+        {text:'会有点失落，需要别人安慰', s:{lie:0,burn:3,sober:0,social:2}}
+    ]
+},
+
+// ──────────── 第二部分：星座特质题 (Q31-Q45) ────────────
+{
+    type:'zodiac', tag:'星座特质',
+    text:'精心准备的计划被意外打乱，你的反应更接近？',
+    options:[
+        {text:'🔥 立刻火大，但气来得快去得也快，马上找新方案', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 非常烦躁，需要时间消化情绪，尝试恢复秩序', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 觉得有点意思，变化本身比原计划更有趣', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 内心戏很多，感到受伤或不安，需要情感支持', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'你更倾向于通过哪种方式获得能量？',
+    options:[
+        {text:'🔥 参加热闹活动，与人竞争或合作', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 投入具体工作，看到切实成果', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 与朋友深度交谈或接触新思想', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 独处、冥想、接触艺术或自然', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'在团队中，你自然扮演的角色是？',
+    options:[
+        {text:'🔥 带头冲锋的领导者，点燃大家的热情', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 默默执行的实干者，确保一切有序推进', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 贡献创意的智多星，提供新视角', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 维系情感的粘合剂，关心每个人的感受', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'表达爱意的方式，你更接近？',
+    options:[
+        {text:'🔥 直接热烈，用行动表达（比如突然出现给你惊喜）', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 含蓄实际，用物质关怀表达（比如给你买需要的东西）', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 语言关心，经常聊天分享有趣的事', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 情感共鸣，在你难过时默默陪伴', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'对待承诺和约定，你的态度是？',
+    options:[
+        {text:'🔥 一言既出驷马难追，说到做到', s:{fire:3,earth:1,air:0,water:0}},
+        {text:'🪨 尽力做到，但也会留有余地', s:{fire:0,earth:3,air:1,water:0}},
+        {text:'🌬️ 看情况，保持灵活不喜欢被束缚', s:{fire:0,earth:0,air:3,water:1}},
+        {text:'💧 被感动时会过度承诺，事后可能做不到', s:{fire:0,earth:0,air:1,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'面对压力时，你最可能的反应是？',
+    options:[
+        {text:'🔥 变得暴躁易怒，但爆发后很快恢复', s:{fire:3,earth:0,air:0,water:1}},
+        {text:'🪨 沉默地扛着，一个人默默消化', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 找人聊天或做其他事转移注意力', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 情绪崩溃大哭一场，然后慢慢恢复', s:{fire:0,earth:0,air:0,water:4}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'你更看重朋友的哪种品质？',
+    options:[
+        {text:'🔥 坦率真诚，有话直说', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 靠谱稳重，说到做到', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 有趣聪明，聊天不无聊', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 善解人意，能理解你的感受', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'你的消费观念更接近？',
+    options:[
+        {text:'🔥 喜欢就买，享受当下最重要', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 注重品质和性价比，买耐用的', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 喜欢买新奇有趣的东西，体验不同', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 容易被感动消费，比如"这个设计背后有故事"', s:{fire:0,earth:0,air:1,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'对待规则和权威，你的态度是？',
+    options:[
+        {text:'🔥 规则就是用来挑战的', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 尊重规则，存在即合理', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 规则是参考，灵活变通最重要', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 不太关注规则，跟着感觉走', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'面对未知的新事物，你的内心感受是？',
+    options:[
+        {text:'🔥 兴奋！迫不及待想尝试', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 谨慎观望，等别人先试了再说', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 好奇，想先了解原理再决定', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 有点害怕但又忍不住被吸引', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'你建立信任的方式更接近？',
+    options:[
+        {text:'🔥 一起经历过事情就能建立信任', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 需要长时间观察，慢慢建立', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 有共同兴趣和话题就能快速建立', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 凭直觉感受对方是否值得信任', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'独处时你最常做的事是？',
+    options:[
+        {text:'🔥 运动/看热血电影/打游戏', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 整理房间/做饭/研究实用技能', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 阅读/看纪录片/学习新知识', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 听音乐/看电影/写日记/发呆', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'你的旅行风格更接近？',
+    options:[
+        {text:'🔥 冒险刺激型：蹦极、徒步、自驾越野', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 舒适享受型：好酒店、好餐厅、不赶行程', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 文化探索型：博物馆、当地市集、和当地人聊天', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 浪漫治愈型：海边、日落、安静的小镇', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'处理冲突时，你更倾向于？',
+    options:[
+        {text:'🔥 直接面对，把话说清楚', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 回避冲突，维持表面和谐', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 用幽默或理性分析化解尴尬', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 冷战沉默，等对方主动来哄', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+{
+    type:'zodiac', tag:'星座特质',
+    text:'你对"完美主义"的态度是？',
+    options:[
+        {text:'🔥 完美？能完成就不错了！追求效率', s:{fire:3,earth:0,air:1,water:0}},
+        {text:'🪨 必须完美，细节决定成败', s:{fire:0,earth:3,air:0,water:1}},
+        {text:'🌬️ 大方向对就行，形式不重要', s:{fire:1,earth:0,air:3,water:0}},
+        {text:'💧 心里有完美的标准但经常做不到，然后自责', s:{fire:0,earth:1,air:0,water:3}}
+    ]
+},
+
+// ──────────── 第三部分：混合情景题 (Q46-Q50) ────────────
+{
+    type:'mix', tag:'灵魂拷问',
+    text:'你发现自己被朋友误解了。此刻你内心深处的声音更可能是？',
+    options:[
+        {text:'🔄 反复回想哪里出了问题，彻夜难眠（内耗模式）', s:{lie:0,burn:4,sober:0,social:1,fire:0,earth:1,air:0,water:2}},
+        {text:'🧠 冷静分析误会根源，择机理性沟通（清醒模式）', s:{lie:0,burn:0,sober:4,social:1,fire:0,earth:2,air:1,water:0}},
+        {text:'😴 "算了，爱咋咋地吧，解释好累"（摆烂模式）', s:{lie:4,burn:1,sober:0,social:0,fire:1,earth:0,air:1,water:0}},
+        {text:'📱 立刻找其他朋友倾诉或发个隐晦的朋友圈（社交模式）', s:{lie:0,burn:1,sober:0,social:4,fire:1,earth:0,air:1,water:1}}
+    ]
+},
+{
+    type:'mix', tag:'灵魂拷问',
+    text:'领导当众批评了你的方案。散会后你的第一反应是？',
+    options:[
+        {text:'😤 默默回到工位，打开文档开始改进（行动派）', s:{lie:0,burn:1,sober:3,social:0,fire:2,earth:2,air:0,water:0}},
+        {text:'🛡️ 越想越不服气，内心组织了一百条反驳理由（防御派）', s:{lie:0,burn:3,sober:1,social:1,fire:2,earth:0,air:1,water:1}},
+        {text:'🫠 打开外卖软件，先吃顿好的压压惊（摆烂派）', s:{lie:4,burn:1,sober:0,social:0,fire:0,earth:1,air:0,water:1}},
+        {text:'😭 躲进厕所/天台，情绪需要先释放一下（情绪派）', s:{lie:0,burn:3,sober:0,social:1,fire:0,earth:0,air:0,water:4}}
+    ]
+},
+{
+    type:'mix', tag:'灵魂拷问',
+    text:'你发现暗恋的人好像对别人有意思。你内心的OS是？',
+    options:[
+        {text:'💥 管他呢，冲了再说！直接表白！（火象附体）', s:{lie:0,burn:0,sober:0,social:3,fire:4,earth:0,air:0,water:0}},
+        {text:'📊 先分析一下对方和那个人的关系到哪一步了（土象附体）', s:{lie:0,burn:2,sober:4,social:0,fire:0,earth:3,air:1,water:0}},
+        {text:'🙃 "我就知道我不配"，开始自我否定（摆烂附体）', s:{lie:3,burn:4,sober:0,social:0,fire:0,earth:0,air:0,water:2}},
+        {text:'🌊 一边听伤感歌曲一边脑补了一整部偶像剧（水象附体）', s:{lie:0,burn:3,sober:0,social:0,fire:0,earth:0,air:0,water:4}}
+    ]
+},
+{
+    type:'mix', tag:'灵魂拷问',
+    text:'社交媒体上出现了一个你很在意的争议话题，你会？',
+    options:[
+        {text:'⚔️ 冲上去表达观点，不吐不快', s:{lie:0,burn:1,sober:0,social:3,fire:3,earth:0,air:1,water:0}},
+        {text:'📝 写一大段有理有据的分析，但写完又删了', s:{lie:0,burn:3,sober:3,social:0,fire:0,earth:1,air:2,water:0}},
+        {text:'🍿 "关我什么事"，默默吃瓜看热闹', s:{lie:3,burn:0,sober:1,social:0,fire:0,earth:1,air:1,water:0}},
+        {text:'😣 看了不舒服，默默划走并屏蔽相关话题', s:{lie:1,burn:3,sober:0,social:0,fire:0,earth:0,air:0,water:3}}
+    ]
+},
+{
+    type:'mix', tag:'灵魂拷问',
+    text:'朋友深夜找你倾诉烦恼，但你明天有重要的事。你最终会？',
+    options:[
+        {text:'❤️ 放下一切先陪朋友，明天的事明天再说', s:{lie:0,burn:1,sober:0,social:4,fire:1,earth:0,air:0,water:3}},
+        {text:'⏰ 先安慰半小时，然后委婉说明天还有事', s:{lie:0,burn:1,sober:3,social:2,fire:0,earth:2,air:1,water:0}},
+        {text:'💤 "我也很困，明天聊吧"，然后关手机', s:{lie:4,burn:0,sober:1,social:0,fire:1,earth:1,air:0,water:0}},
+        {text:'🥺 陪朋友聊了一整夜，第二天顶着黑眼圈硬撑', s:{lie:0,burn:3,sober:0,social:3,fire:0,earth:0,air:0,water:4}}
+    ]
+}
+];
+
+// =====================================================================
+//  16种复合人格结果库
+// =====================================================================
+const resultsDB = {
+    // ===== 摆烂系 (lie) =====
+    'lie-fire': {
+        label:'白羊座·摆烂冲锋者',
+        subtitle:'间歇性踌躇满志，持续性混吃等死',
+        desc:'你的内心有一团火，但这团火经常只在"立flag"的瞬间燃烧。你热情来得快去得也快，今天说要减肥，明天就点了炸鸡外卖。你不是没有能力，只是觉得"人生苦短，及时行乐"才是真理。你的摆烂不是放弃，而是一种"战略性休息"——休息好了，随时能冲（虽然这个"随时"可能永远不会来）。',
+        tags:['间歇性努力','flag大师','快乐至上','战略性躺平'],
+        advice:'你的热情是你的超能力，试着把它聚焦在一个小目标上。不需要"从此改变人生"，只要"今天比昨天多做一点点"就够了。'
+    },
+    'lie-earth': {
+        label:'金牛座·舒适区守护者',
+        subtitle:'不是摆烂，是选择性努力',
+        desc:'你追求的不是成功，而是舒适。你有一套自己的生活节奏，任何试图打乱它的外力都会被你默默化解。你不是懒，你只是很清楚什么值得花力气——那些不能立刻带来回报的事，你选择"以后再说"。你的世界里，一张舒适的沙发、一顿好吃的饭，比任何宏大目标都重要。',
+        tags:['舒适至上','享受生活','稳如泰山','美食家'],
+        advice:'偶尔走出舒适区，你可能会发现外面的世界也没那么可怕。但记住，回来的路永远为你敞开。'
+    },
+    'lie-air': {
+        label:'双子座·注意力漂移者',
+        subtitle:'兴趣广泛，精通None',
+        desc:'你的大脑像一个开了20个标签页的浏览器，每个都在加载但没有一个真正完成。你对什么都感兴趣，但热情只能维持三天。你的收藏夹里有100个"以后再看"的视频，书架上有10本只翻了前三页的书。你不是没有能力，只是这个世界太有趣了，你舍不得只选一样。',
+        tags:['三分钟热度','收藏夹考古','多线程人生','浅尝辄止'],
+        advice:'试着把"什么都想了解"变成一种优势——做一个"连接者"，把你广泛涉猎的知识点串联起来，这本身就是稀缺能力。'
+    },
+    'lie-water': {
+        label:'巨蟹座·温柔摆烂者',
+        subtitle:'用emo当借口，用善良当盾牌',
+        desc:'你的摆烂带着一层柔软的滤镜。你不是不想努力，只是情绪总是先一步占据你的精力。你很容易被感动，也很容易受伤，然后告诉自己"今天状态不好，明天再说"。你对别人特别好，好到忘了自己也需要被照顾。你的心是一座温暖的小屋，但门经常关着。',
+        tags:['情绪优先','温柔陷阱','自我保护','共情过载'],
+        advice:'你的情绪不是弱点，但也不应该成为停滞的借口。试着给"照顾自己"也列进日程表——你值得被自己温柔对待。'
+    },
+
+    // ===== 内耗系 (burn) =====
+    'burn-fire': {
+        label:'狮子座·暴躁内耗者',
+        subtitle:'表面霸气，内心弹幕刷屏',
+        desc:'你在人前是光芒万丈的小太阳，人后却在反复回放自己说过的每一句话。你对自己要求很高，高到不允许自己有一丝不完美。你生气的时候是真的生气，但气完之后又会自责"我刚才是不是太凶了"。你的内耗来自于"我应该更好"和"我为什么做不到"之间的永恒拉扯。',
+        tags:['完美主义','外强中干','自尊心爆棚','弹幕型人格'],
+        advice:'你已经很好了，不需要时刻证明自己。试着对自己说："今天的我已经足够好了。"这句话不会削弱你的光芒，只会让它更持久。'
+    },
+    'burn-earth': {
+        label:'处女座·焦虑分析师',
+        subtitle:'每个细节都是一个焦虑源',
+        desc:'你的大脑是一台永不停歇的分析引擎。你会把一件小事拆解成无数个细节，然后对每个细节进行风险评估。你总是在想"万一……怎么办"，以至于"万一"还没发生，你已经把自己累垮了。你的高标准让你做事很靠谱，但也让你活得很累。',
+        tags:['细节控','风险预判','过度规划','自我施压'],
+        advice:'试着接受"80分就够了"这个概念。世界不会因为你少检查一遍就崩塌，但你的精神状态会因为你放过自己而改善很多。'
+    },
+    'burn-air': {
+        label:'天秤座·纠结内耗者',
+        subtitle:'选A还是选B？选了又后悔',
+        desc:'你是选择困难症的天花板。小到中午吃什么，大到人生方向，你都能纠结到天荒地老。你不是没有主见，而是你能同时看到每个选项的好和坏，然后陷入"如果选了另一个会不会更好"的永恒循环。你追求平衡和和谐，但内心从未真正平衡过。',
+        tags:['选择困难','反复权衡','和谐至上','内心剧场'],
+        advice:'给自己设一个"决策计时器"——小事30秒，大事3天。时间到了就必须选，选了就不回头。记住：没有完美的选择，只有让选择变对的行动。'
+    },
+    'burn-water': {
+        label:'天蝎座·自我攻击者',
+        subtitle:'最狠的批评家住在你心里',
+        desc:'你的心是一座深海，表面平静，底下暗流涌动。你对自己的要求近乎苛刻，任何失误都会在你心里被无限放大。你很少向别人展示脆弱，因为你觉得"不应该让别人看到我不好的一面"。你的内耗是沉默的，但破坏力惊人——它会慢慢侵蚀你的自信和快乐。',
+        tags:['深度内耗','完美主义','隐藏脆弱','自我惩罚'],
+        advice:'你不需要时刻坚强。试着对信任的人展示你的脆弱，你会发现，被接纳的感觉比独自扛着好一万倍。你的不完美，才是最真实、最有力量的你。'
+    },
+
+    // ===== 清醒系 (sober) =====
+    'sober-fire': {
+        label:'射手座·清醒冒险家',
+        subtitle:'看得清方向，也敢迈出脚步',
+        desc:'你是少数能把"想清楚"和"做得到"结合在一起的人。你有火象星座的行动力，也有超越情绪的理性视角。你不会被一时的冲动裹挟，也不会被过度的分析困住。你像一个经验丰富的旅人，知道目的地在哪，也享受路上的风景。',
+        tags:['目标清晰','行动力强','乐观理性','自由灵魂'],
+        advice:'你的清醒是你的铠甲，但偶尔也可以卸下来。不是所有事都需要"有意义"，有时候"开心"本身就是最大的意义。'
+    },
+    'sober-earth': {
+        label:'摩羯座·理性战略家',
+        subtitle:'人生如棋，每一步都算好了',
+        desc:'你是天生的战略家。你不会被情绪左右决策，也不会被短期的诱惑动摇长期的计划。你像一座山，沉稳、可靠、不动声色。你相信时间的力量，愿意为长远目标牺牲眼前的快乐。但有时候，你算得太清楚，反而忘了生活不只是一个待完成的任务清单。',
+        tags:['长期主义','目标导向','自律达人','情绪稳定'],
+        advice:'你的人生规划能力令人佩服，但偶尔也可以"失控"一下——来一场说走就走的旅行，吃一顿没有营养但很快乐的垃圾食品。人生不只有山顶，沿途的野花也值得停下来看看。'
+    },
+    'sober-air': {
+        label:'水瓶座·人间清醒者',
+        subtitle:'看穿一切，但选择不说破',
+        desc:'你像一个站在局外的观察者，总能一眼看穿事情的本质和荒谬。你反感虚伪和套路，追求绝对的真实与自由。你的清醒让你很少被骗，但也让你偶尔感到孤独——因为大多数人看不到你看到的东西。你是那个在大家都醉的时候唯一清醒的人。',
+        tags:['洞察力强','独立思考','叛逆清醒','旁观者视角'],
+        advice:'清醒是一种天赋，但也别忘了偶尔"入戏"。有时候，明知道是套路但还是选择相信，不是傻，是一种更高级的勇敢。'
+    },
+    'sober-water': {
+        label:'双鱼座·温柔智者',
+        subtitle:'用共情力看世界，用智慧保护自己',
+        desc:'你是一个罕见的组合——既有水象星座的深度共情力，又有超越情绪的清醒头脑。你能感受到别人感受不到的东西，也能在情绪的漩涡中找到理性的锚点。你像一位温柔的智者，不评判，不强求，只是安静地理解一切。',
+        tags:['共情力满分','温柔坚定','直觉敏锐','灵魂导师'],
+        advice:'你的温柔和清醒是给别人的礼物，但别忘了给自己也留一份。你不需要做所有人的避风港，有时候你也可以做那个需要被保护的人。'
+    },
+
+    // ===== 社交系 (social) =====
+    'social-fire': {
+        label:'狮子座·社交C位者',
+        subtitle:'哪里有你，哪里就有光',
+        desc:'你是天生的社交中心。你热情、大方、有感染力，能在任何场合迅速成为焦点。你享受被关注的感觉，也愿意用自己的能量照亮别人。你的社交不是表演，而是你与世界连接的方式。你是那种"一个人也能嗨，一群人更嗨"的稀有物种。',
+        tags:['社交达人','能量满满','C位体质','慷慨热情'],
+        advice:'你的社交能量是你的超能力，但记得给自己留充电时间。不是每个场合都需要你来活跃气氛，有时候安静地待在角落，也是一种力量。'
+    },
+    'social-earth': {
+        label:'金牛座·可靠社交者',
+        subtitle:'朋友不多，但每个都是铁的',
+        desc:'你不是社交花蝴蝶，但你是那种"有事真上"的朋友。你的社交圈不大，但每一段关系都是经过时间考验的。你不擅长说漂亮话，但你会用行动证明你在意的人。你是朋友圈里的"定海神针"——不管发生什么，你都在。',
+        tags:['重质重量','行动派友谊','稳如磐石','默默守护'],
+        advice:'你的可靠是你的名片，但偶尔也可以主动表达情感。一句"你对我很重要"，比你默默做十件事更能打动人心。'
+    },
+    'social-air': {
+        label:'天秤座·社交蝴蝶',
+        subtitle:'和谁都能聊，跟谁都合得来',
+        desc:'你是天生的社交润滑剂。你有敏锐的社交直觉，能快速感知每个人的情绪和需求，然后调整自己的状态去配合。你讨厌冲突，追求和谐，是朋友圈里的"和平大使"。你的社交能力让你在任何场合都如鱼得水，但有时候你会为了和谐而委屈自己。',
+        tags:['社交直觉','和谐追求者','八面玲珑','讨好倾向'],
+        advice:'你不需要让所有人都喜欢你。真正的友谊建立在真实之上，而不是"永远不产生摩擦"。偶尔表达你的真实想法，你会发现，真正的朋友会更尊重你。'
+    },
+    'social-water': {
+        label:'巨蟹座·情感连接者',
+        subtitle:'用真心换真心，用温度暖人心',
+        desc:'你的社交不是广度，而是深度。你能记住每个朋友的生日、喜好和最近的烦恼。你是那个在朋友难过时第一个出现的人，也是那个默默为所有人操心的"妈妈型"朋友。你的社交带着一种治愈力，靠近你的人都会感到温暖。',
+        tags:['深度共情','治愈系','操心命','真心换真心'],
+        advice:'你的温暖是你的天赋，但别把自己燃尽了。学会说"不"，学会接受别人的帮助——你不需要永远做那个给予的人。'
+    }
+};
+
+// =====================================================================
+//  全局变量
+// =====================================================================
+let currentQ = 0;
+let scores = {lie:0, burn:0, sober:0, social:0, fire:0, earth:0, air:0, water:0};
+let userZodiac = '';
+const zodiacElement = {
+    '白羊座':'fire','狮子座':'fire','射手座':'fire',
+    '金牛座':'earth','处女座':'earth','摩羯座':'earth',
+    '双子座':'air','天秤座':'air','水瓶座':'air',
+    '巨蟹座':'water','天蝎座':'water','双鱼座':'water'
+};
+
+// =====================================================================
+//  核心函数
+// =====================================================================
+function showZodiacModal() {
+    document.getElementById('zodiac-modal').style.display = 'flex';
+}
+
+function selectZodiac(z) {
+    userZodiac = z;
+    document.getElementById('zodiac-modal').style.display = 'none';
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('quiz').style.display = 'block';
+    document.getElementById('zodiac-badge').textContent = '🪐 ' + z;
+    showQuestion();
+}
+
+function showQuestion() {
+    const q = questions[currentQ];
+    document.getElementById('counter').textContent = `${currentQ+1} / ${questions.length}`;
+    document.getElementById('q-number').textContent = `Q${currentQ+1}`;
+    
+    const tagMap = {sbt:'SBTI核心', zodiac:'星座特质', mix:'灵魂拷问'};
+    document.getElementById('q-tag').textContent = tagMap[q.type] || q.tag;
+    
+    document.getElementById('q-text').textContent = q.text;
+    
+    const box = document.getElementById('options-box');
+    box.innerHTML = '';
+    const letters = ['A','B','C','D'];
+    
+    q.options.forEach((opt, i) => {
+        const el = document.createElement('div');
+        el.className = 'option';
+        el.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt.text}`;
+        el.onclick = () => selectOption(i);
+        box.appendChild(el);
+    });
+
+    const pct = (currentQ / questions.length) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+}
+
+function selectOption(idx) {
+    const opts = document.querySelectorAll('.option');
+    opts.forEach(o => o.classList.remove('selected'));
+    opts[idx].classList.add('selected');
+
+    const s = questions[currentQ].options[idx].s;
+    for (let k in s) scores[k] += s[k];
+
+    setTimeout(() => {
+        currentQ++;
+        if (currentQ < questions.length) {
+            showQuestion();
+        } else {
+            document.getElementById('progress').style.width = '100%';
+            setTimeout(showResult, 300);
+        }
+    }, 350);
+}
+
+function showResult() {
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('result').style.display = 'block';
+
+    // SBTI主维度
+    const sbtS = {lie:scores.lie, burn:scores.burn, sober:scores.sober, social:scores.social};
+    const mainSbt = Object.keys(sbtS).reduce((a,b) => sbtS[a]>sbtS[b]?a:b);
+
+    // 星座元素
+    const mainEl = zodiacElement[userZodiac] || 'fire';
+
+    const key = mainSbt + '-' + mainEl;
+    const r = resultsDB[key] || resultsDB['lie-fire'];
+
+    document.getElementById('r-label').textContent = `${userZodiac} · ${r.label}`;
+    document.getElementById('r-subtitle').textContent = r.subtitle;
+    document.getElementById('r-desc').textContent = r.desc;
+    
+    const tagsBox = document.getElementById('r-tags');
+    tagsBox.innerHTML = '';
+    r.tags.forEach(t => {
+        const sp = document.createElement('span');
+        sp.className = 'result-tag';
+        sp.textContent = t;
+        tagsBox.appendChild(sp);
+    });
+
+    document.getElementById('r-advice-text').textContent = r.advice;
+}
+
+function showShare() {
+    const label = document.getElementById('r-label').textContent;
+    const sub = document.getElementById('r-subtitle').textContent;
+    const text = `🔮 我在「SBTI星座人格实验室」测出了【${label}】\n"${sub}"\n\n🧠 50道灵魂拷问 × 12星座\n解码你的星座×情绪双重人格\n\n👉 你也来测测？`;
+    document.getElementById('share-text').textContent = text;
+    document.getElementById('share-modal').style.display = 'flex';
+}
+
+function copyShare() {
+    const text = document.getElementById('share-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✅ 已复制！';
+        setTimeout(() => btn.textContent = '📋 复制文案', 2000);
+    });
+}
+
+function closeShare() {
+    document.getElementById('share-modal').style.display = 'none';
+}
+
+// 点击弹窗外部关闭
+document.getElementById('share-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeShare();
+});
+document.getElementById('zodiac-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
+</script>
+</body>
+</html>
